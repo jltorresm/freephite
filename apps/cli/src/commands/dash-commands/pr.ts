@@ -23,14 +23,12 @@ type argsT = yargs.Arguments<yargs.InferredOptionTypes<typeof args>>;
 
 export const handler = async (argv: argsT): Promise<void> =>
   graphite(argv, canonical, async (context) => {
-    const dashboardUrl = context.userConfig.getAppServerUrl();
-    const prPath = `${dashboardUrl}/github/pr/`;
+    const prPath = `https://github.com/${context.repoConfig.getRepoOwner()}/${context.repoConfig.getRepoName()}`;
+    const dashboardUrl = `${prPath}/pulls`;
 
     const prNumber = parseInt(argv.pr || '');
     if (prNumber) {
-      return void open(
-        `${prPath}${context.repoConfig.getRepoOwner()}/${context.repoConfig.getRepoName()}/${prNumber}`
-      );
+      return void open(`${prPath}/pull/${prNumber}`);
     }
 
     const branchName = argv.pr ? argv.pr : context.engine.currentBranch;
@@ -40,9 +38,7 @@ export const handler = async (argv: argsT): Promise<void> =>
       : undefined;
 
     if (branchPrNumber) {
-      return void open(
-        `${prPath}${context.repoConfig.getRepoOwner()}/${context.repoConfig.getRepoName()}/${branchPrNumber}`
-      );
+      return void open(`${prPath}/pull/${branchPrNumber}`);
     }
 
     return void open(dashboardUrl);
