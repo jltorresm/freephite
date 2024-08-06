@@ -44,11 +44,7 @@ export type TProfile = Required<
 
 export type TApiServerUrl = string;
 export type TAppServerUrl = string;
-export const DEFAULT_GRAPHITE_API_SERVER: TApiServerUrl =
-  'https://api.graphite.dev/v1';
-
-export const DEFAULT_GRAPHITE_APP_SERVER: TAppServerUrl =
-  'https://app.graphite.dev';
+export const DEFAULT_API_SERVER: TApiServerUrl = 'https://github.com';
 
 export const userConfigFactory = spiffy({
   schema,
@@ -96,17 +92,11 @@ export const userConfigFactory = spiffy({
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
         return 'https://localhost:8000/v1';
       }
-      const hostPrefix = getDefaultProfile().hostPrefix;
-      return hostPrefix
-        ? `https://api.${hostPrefix}.graphite.dev/v1`
-        : DEFAULT_GRAPHITE_API_SERVER;
+      return DEFAULT_API_SERVER;
     };
 
     const getAppServerUrl = (): TAppServerUrl => {
-      const hostPrefix = getDefaultProfile().hostPrefix;
-      return hostPrefix
-        ? `https://app.${hostPrefix}.graphite.dev`
-        : DEFAULT_GRAPHITE_APP_SERVER;
+      return DEFAULT_API_SERVER;
     };
 
     const getAuthToken = (): string | undefined => {
