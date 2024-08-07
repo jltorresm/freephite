@@ -58,25 +58,32 @@ export const handler = async (argv: argsT): Promise<void> =>
       value: pr.html_url,
     }));
 
-    const { prUrl } = await context.prompts({
-      type: 'autocomplete',
-      name: 'prUrl',
-      message: 'Select a PR to open',
-      choices: prs,
-      initial: -1,
-      limit: 30,
-      suggest: (input) =>
-        Promise.resolve(
-          prs.filter((c: prompts.Choice) =>
-            c.title.toLocaleLowerCase().includes(input.toLocaleLowerCase())
-          )
-        ),
-    });
+    const { prUrl } = await context.prompts(
+      {
+        type: 'autocomplete',
+        name: 'prUrl',
+        message: 'Select a PR to open',
+        choices: prs,
+        initial: -1,
+        limit: 30,
+        suggest: (input) =>
+          Promise.resolve(
+            prs.filter((c: prompts.Choice) =>
+              c.title.toLocaleLowerCase().includes(input.toLocaleLowerCase())
+            )
+          ),
+      },
+      {
+        onCancel: (_prompt, _answers) => {
+          context.splog.warn('Selection cancelled by user.\n');
+        },
+      }
+    );
 
     clearPromptResultLine();
     context.splog.debug(`Selected ${prUrl}`);
 
-    return void open(prUrl);
+    return void (prUrl ? open(prUrl) : null);
   });
 
 function getFilterReviewRequested(
