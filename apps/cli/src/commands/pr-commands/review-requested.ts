@@ -19,8 +19,8 @@ export const args = {
     type: 'string',
     hidden: false,
   },
-  exclude_teams: {
-    describe: `Exclude review requests made for the user's teams.`,
+  include_teams: {
+    describe: `Include review requests made for the user's teams.`,
     alias: 't',
     demandOption: false,
     positional: false,
@@ -44,19 +44,25 @@ export const handler = async (argv: argsT): Promise<void> =>
 
     context.splog.info(`Getting review requests for ${chalk.green(username)}.`);
 
-    if (!argv.exclude_teams) {
+    if (argv.include_teams) {
       context.splog.info(chalk.cyan(`Including user's teams!`));
       teams = await getUserTeams({ context, username });
     } else {
-      context.splog.warn(`Excluding user's teams!`);
+      context.splog.info(chalk.gray(`Excluding user's teams!`));
     }
 
     const filter = getFilterReviewRequested(username, teams);
 
-    const prs = (await getPRs({ context, filter })).map((pr) => ({
+    const all_prs = await getPRs({ context, filter });
+    const prs = all_prs.map((pr) => ({
       title: `${getPRTitleLine(pr)}\n        ${chalk.magenta(pr.html_url)}`,
       value: pr.html_url,
     }));
+
+    if (prs.length == 0) {
+      context.splog.info(chalk.magenta(`There are no PRs to display!`));
+      return;
+    }
 
     const { prUrl } = await context.prompts(
       {
@@ -75,6 +81,7 @@ export const handler = async (argv: argsT): Promise<void> =>
       },
       {
         onCancel: (_prompt, _answers) => {
+          clearPromptResultLine();
           context.splog.warn('Selection cancelled by user.\n');
         },
       }
