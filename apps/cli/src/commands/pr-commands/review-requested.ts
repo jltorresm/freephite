@@ -98,17 +98,25 @@ function getFilterReviewRequested(
   teams: Teams
 ): (pr: PullRequestInfo) => boolean {
   return (pr: PullRequestInfo): boolean => {
+    // Don't include PRs where the user is the author.
+    if (pr.user.login == username) return false;
+
+    // Include PRs where the user is reviewer.
     for (const reviewer of pr.requested_reviewers) {
       if (reviewer.login == username) return true;
     }
+
+    // Include PRs where a user's team is reviewer.
     for (const requested_team of pr.requested_teams) {
       for (const user_team of teams) {
         if (requested_team.name == user_team.name) return true;
       }
     }
+
     return false;
   };
 }
+
 function getPRTitleLine(pr: PullRequestInfo): string {
   const prNumber = `PR #${pr.number}`;
 

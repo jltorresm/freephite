@@ -54,7 +54,7 @@ export async function getPRs({
         repo,
         // state: 'open',
         sort: 'created',
-        direction: 'asc',
+        direction: 'desc',
         per_page: 100,
         headers: { 'X-GitHub-Api-Version': '2022-11-28' },
       });
