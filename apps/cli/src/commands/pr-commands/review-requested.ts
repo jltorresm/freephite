@@ -55,7 +55,8 @@ export const handler = async (argv: argsT): Promise<void> =>
 
     const all_prs = await getPRs({ context, filter });
     const prs = all_prs.map((pr) => ({
-      title: `${getPRTitleLine(pr)}\n        ${chalk.magenta(pr.html_url)}`,
+      title: getPRTitleLine(pr),
+      // title: `${getPRTitleLine(pr)}\n\t${chalk.gray(pr.html_url)}`,
       value: pr.html_url,
     }));
 
@@ -87,7 +88,6 @@ export const handler = async (argv: argsT): Promise<void> =>
       }
     );
 
-    clearPromptResultLine();
     context.splog.debug(`Selected ${prUrl}`);
 
     return void (prUrl ? open(prUrl) : null);
@@ -119,14 +119,11 @@ function getFilterReviewRequested(
 
 function getPRTitleLine(pr: PullRequestInfo): string {
   const prNumber = `PR #${pr.number}`;
-
-  if (pr?.state.toLowerCase() === 'merged') {
-    return `${prNumber} (merged) ${pr.title}`;
-  } else if (pr?.state.toLowerCase() === 'closed') {
-    return `${prNumber} (abandoned) ${chalk.strikethrough(`${pr.title}`)}`;
-  } else {
-    return `${chalk.yellow(prNumber)} ${chalk.gray(`(${pr.state})`)} ${
-      pr.title
-    }`;
-  }
+  const author = pr.user.login;
+  return (
+    `${chalk.yellow(prNumber)} ` +
+    `${chalk.blueBright(`(${author})`)} ` +
+    // `${chalk.gray(`(${pr.state})`)} ` +
+    `${pr.title}`
+  );
 }
