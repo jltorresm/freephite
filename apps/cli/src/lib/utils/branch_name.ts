@@ -29,15 +29,16 @@ export function newBranchName(
   commitMessage: string | undefined,
   context: TContext
 ): string | undefined {
+  const branchPrefix = context.userConfig.data.branchPrefix || '';
+
   if (branchName) {
-    return replaceUnsupportedCharacters(branchName, context);
+    branchName = replaceUnsupportedCharacters(branchName, context);
+    return (branchPrefix + branchName).slice(0, MAX_BRANCH_NAME_BYTE_LENGTH);
   }
 
   if (!commitMessage) {
     return undefined;
   }
-
-  const branchPrefix = context.userConfig.data.branchPrefix || '';
 
   const date = new Date();
   const branchDate = getBranchDateEnabled(context)
