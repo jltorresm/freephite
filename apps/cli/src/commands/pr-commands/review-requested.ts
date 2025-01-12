@@ -56,7 +56,6 @@ export const handler = async (argv: argsT): Promise<void> =>
     const all_prs = await getPRs({ context, filter });
     const prs = all_prs.map((pr) => ({
       title: getPRTitleLine(pr),
-      // title: `${getPRTitleLine(pr)}\n\t${chalk.gray(pr.html_url)}`,
       value: pr.html_url,
     }));
 
