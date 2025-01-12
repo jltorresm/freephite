@@ -171,20 +171,37 @@ async function requestServerToSubmitPRs({
     }
 
     if (info.action === 'update') {
-      prs.push(
-        await octokit.request(
-          `PATCH /repos/{owner}/{repo}/pulls/{pull_number}`,
-          {
-            owner,
-            repo,
-            pull_number: info.prNumber,
-            title: info.title,
-            body: info.body,
-            base: info.base,
-            headers: { 'X-GitHub-Api-Version': '2022-11-28' },
-          }
-        )
+      const updated = await octokit.request(
+        `PATCH /repos/{owner}/{repo}/pulls/{pull_number}`,
+        {
+          owner,
+          repo,
+          pull_number: info.prNumber,
+          title: info.title,
+          body: info.body,
+          base: info.base,
+          headers: { 'X-GitHub-Api-Version': '2022-11-28' },
+        }
       );
+      prs.push(updated);
+
+      // Mark the PR as ready for review if needed.
+      if (!info.draft) {
+        await octokit.graphql(
+          `
+		        mutation markPullRequestReadyForReview($input: MarkPullRequestReadyForReviewInput!) {
+              markPullRequestReadyForReview(input: $input) {
+                clientMutationId,
+              }
+            }
+		      `,
+          {
+            input: {
+              pullRequestId: updated.data.node_id,
+            },
+          }
+        );
+      }
     }
   }
 

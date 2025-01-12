@@ -22,6 +22,7 @@ type TPRSubmissionAction = { branchName: string } & (
  * - the PR's code contents
  * - the PR's title
  * - the PR's body
+ * - the PR's review status (draft or not)
  *
  * Therefore, we should only update the PR iff either of these properties
  * differ from our stored data on the previous PR submission.
@@ -150,8 +151,7 @@ async function getPRAction(
     }[status]
   );
 
-  const shouldSkipUpdate =
-    args.always === false && (args.dryRun || status === 'NOOP');
+  const shouldSkipUpdate = !args.always && (args.dryRun || status === 'NOOP');
 
   return shouldSkipUpdate
     ? undefined
